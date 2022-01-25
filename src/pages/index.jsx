@@ -1,17 +1,28 @@
 import { Box, Button, Text, TextField, Image } from "@skynexui/components";
+import { useState } from "react";
+import { useRouter } from "next/router";
 import appConfig from "../../config.json";
 
 import Title from "../components/Title";
 
-import GlobalStyle from "../style/GlobalStyle";
-
 export default function Home() {
-	const username = "MatheusFLemma";
+	const [username, setUsername] = useState('MatheusFLemma');
+	const router = useRouter();
+
+	function inputChange(event) {
+		const value = event.target.value;
+
+		setUsername(value);
+	}
+
+	function formSubmit(event) {
+		event.preventDefault();
+		
+		router.push('/chat');
+	}
 
 	return (
 		<>
-			<GlobalStyle />
-
 			<Box
 				styleSheet={{
 					display: "flex",
@@ -45,6 +56,7 @@ export default function Home() {
 				>
 					<Box
 						as='form'
+						onSubmit={formSubmit}
 						styleSheet={{
 							display: "flex",
 							flexDirection: "column",
@@ -68,6 +80,7 @@ export default function Home() {
 						</Text>
 
 						<TextField
+						onChange={inputChange}
 							fullWidth
 							textFieldColors={{
 								neutral: {
