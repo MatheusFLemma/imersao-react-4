@@ -1,5 +1,7 @@
 import { Provider } from '@skynexui/components'
 
+import GlobalStyle from "../style/GlobalStyle";
+
 export default function App({ Component, pageProps }) {
   return (
     <Provider
@@ -11,6 +13,7 @@ export default function App({ Component, pageProps }) {
         },
       }}
     >
+      <GlobalStyle />
       <Component {...pageProps} />
     </Provider>
   )
