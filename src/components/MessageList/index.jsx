@@ -45,7 +45,7 @@ export default function MessageList(props) {
                   display: "block",
                   marginRight: ".5rem",
                 }}
-                src={`https://github.com/MatheusFLemma.png`}
+                src={`https://github.com/${message.from}.png`}
               />
               <Text tag="strong">{message.from}</Text>
               <Text

@@ -1,28 +1,49 @@
 import { Box, TextField } from "@skynexui/components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import appConfig from "../../config.json";
+import { createClient } from "@supabase/supabase-js";
 
 import Header from "../components/Header";
 import MessageList from "../components/MessageList";
 
-export default function Chat() {
+export default function Chat({ SUPABASE_ANON_KEY, SUPABASE_URL }) {
+  // STATES
   const [message, setMessage] = useState("");
   const [listMessage, setListMessage] = useState([]);
 
-  function changeMessage(event) {
-    const valor = event.target.value;
+  //SUPABASE CONFIG
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  //SUPABASE GET MESSAGE
+  useEffect(() => {
+    supabaseClient
+      .from("message")
+      .select("*")
+      .order("id", { ascending: false })
+      .then(({ data }) => {
+        setListMessage(data);
+      });
+  }, []);
 
-    setMessage(valor);
+  function changeMessage(event) {
+    const value = event.target.value;
+
+    setMessage(value);
   }
 
   function handleNewMessage(newMessage) {
     const message = {
-      id: listMessage.length + 1,
       from: "MatheusFLemma",
       content: newMessage,
     };
 
-    setListMessage([message, ...listMessage]);
+    //SUPABASE POST MESSAGE
+    supabaseClient
+      .from("message")
+      .insert([message])
+      .then(({ data }) => {
+        setListMessage([data[0], ...listMessage]);
+      });
+
     setMessage("");
   }
 
@@ -107,3 +128,14 @@ export default function Chat() {
     </Box>
   );
 }
+
+export const getServerSideProps = async () => {
+  const { SUPABASE_ANON_KEY, SUPABASE_URL } = process.env;
+
+  return {
+    props: {
+      SUPABASE_ANON_KEY,
+      SUPABASE_URL,
+    },
+  };
+};
