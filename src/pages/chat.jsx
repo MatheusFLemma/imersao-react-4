@@ -2,16 +2,23 @@ import { Box, TextField } from "@skynexui/components";
 import { useEffect, useState } from "react";
 import appConfig from "../../config.json";
 import { createClient } from "@supabase/supabase-js";
+import { useRouter } from "next/router";
 
-import Header from "../components/Header";
-import MessageList from "../components/MessageList";
+import { Header } from "../components/Header";
+import { MessageList } from "../components/MessageList";
+import { SendSticker } from "../components/SendSticker";
 
 export default function Chat({ SUPABASE_ANON_KEY, SUPABASE_URL }) {
+  // LOGIN USING USERNAME
+  const router = useRouter();
+  const userLoggedIn = router.query.username;
+
   // STATES
   const [message, setMessage] = useState("");
   const [listMessage, setListMessage] = useState([]);
 
-  //SUPABASE CONFIG
+  //SUPABASE
+  //SUPABASE AUTH CONFIG
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   //SUPABASE GET MESSAGE
   useEffect(() => {
@@ -22,7 +29,27 @@ export default function Chat({ SUPABASE_ANON_KEY, SUPABASE_URL }) {
       .then(({ data }) => {
         setListMessage(data);
       });
+
+    const subscription = updateMessageInRealTime((newMessage) => {
+      setListMessage((listValue) => {
+        return [newMessage, ...listValue];
+      });
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
+
+  //UPDATING IN REAL TIME MESSAGE
+  function updateMessageInRealTime(addMessage) {
+    return supabaseClient
+      .from("message")
+      .on("INSERT", (response) => {
+        addMessage(response.new);
+      })
+      .subscribe();
+  }
 
   function changeMessage(event) {
     const value = event.target.value;
@@ -32,7 +59,7 @@ export default function Chat({ SUPABASE_ANON_KEY, SUPABASE_URL }) {
 
   function handleNewMessage(newMessage) {
     const message = {
-      from: "MatheusFLemma",
+      from: userLoggedIn,
       content: newMessage,
     };
 
@@ -41,7 +68,7 @@ export default function Chat({ SUPABASE_ANON_KEY, SUPABASE_URL }) {
       .from("message")
       .insert([message])
       .then(({ data }) => {
-        setListMessage([data[0], ...listMessage]);
+        console.log(data);
       });
 
     setMessage("");
@@ -121,6 +148,12 @@ export default function Chat({ SUPABASE_ANON_KEY, SUPABASE_URL }) {
                 marginRight: ".75rem",
                 color: appConfig.theme.colors.neutrals[200],
               }}
+            />
+
+            <SendSticker
+              onStickerClick={(sticker) =>
+                handleNewMessage(`:sticker: ${sticker}`)
+              }
             />
           </Box>
         </Box>
