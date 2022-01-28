@@ -1,7 +1,7 @@
 import { Box, Text, Image } from "@skynexui/components";
 import appConfig from "../../../config.json";
 
-export default function MessageList(props) {
+export function MessageList(props) {
   return (
     <Box
       tag="ul"
@@ -59,7 +59,16 @@ export default function MessageList(props) {
                 {new Date().toLocaleDateString()}
               </Text>
             </Box>
-            {message.content}
+            {message.content.startsWith(":sticker:") ? (
+              <Image
+                styleSheet={{
+                  maxWidth: "10%",
+                }}
+                src={message.content.replace(":sticker:", "")}
+              />
+            ) : (
+              message.content
+            )}
           </Text>
         );
       })}

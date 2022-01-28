@@ -1,6 +1,6 @@
 import { Box, Text, Button } from "@skynexui/components";
 
-export default function Header() {
+export function Header() {
   return (
     <>
       <Box
